@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>demo</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.js"></script>
+    <script src="http://ui-grid.info/release/ui-grid.js"></script>
+    <link rel="stylesheet" href="http://ui-grid.info/release/ui-grid.css" type="text/css">
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+        }
+        input, select {
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            grid-column: span 3;
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+        }
+        .grid {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+ 
+    <div ng-view></div>
+    <script>
+        var app = angular.module('myApp', ["ui.grid", "ui.grid.pagination", "ngRoute"]);
+        //this is for routers config
+        app.config(function($routeProvider) {
+            $routeProvider
+                .when("/add", {
+                    templateUrl: "add.html",
+                    controller: "FormController"
+                })
+                .when("/grid", {
+                    templateUrl: "home.html",
+                    controller: "MainController"
+                })
+                .when("/edit",{
+                    templateUrl:"edit.html",
+                    controller:"EditController"
+                })
+                .otherwise({
+                    redirectTo: "/add"
+                });
+        });
+        //grid table info and storing them
+        app.run(function($rootScope) {
+            var storing=localStorage.getItem('users');
+            $rootScope.users = storing?JSON.parse(storing):[
+                { name: "Madhav Sai", age: 10, location: 'Nagpur'},
+                { name: "Suresh Dasari", age: 30, location: 'Chennai' },
+                { name: "Rohini Alavala", age: 29, location: 'Chennai' },
+                { name: "Praveen Kumar", age: 25, location: 'Bangalore' },
+                { name: "Sateesh Chandra", age: 27, location: 'Vizag' },
+                { name: "Siva Prasad", age: 38, location: 'Nagpur' },
+                { name: "Sudheer Rayana", age: 25, location: 'Kakinada' },
+                { name: "Honey Yemineni", age: 7, location: 'Nagpur' },
+                { name: "Mahendra Dasari", age: 22, location: 'Vijayawada' },
+                { name: "Mahesh Dasari", age: 23, location: 'California' },
+                { name: "Nagaraju Dasari", age: 34, location: 'Atlanta' },
+                { name: "Gopi Krishna", age: 29, location: 'Repalle' },
+                { name: "Sudheer Uppala", age: 19, location: 'Guntur' },
+                { name: "Sushmita", age: 27, location: 'Vizag' },
+                { name: "Mahendra Dasari", age: 22, location: 'Vijayawada' },
+                { name: "Mahesh Dasari", age: 23, location: 'California' },
+                { name: "Nagaraju Dasari", age: 34, location: 'Atlanta' },
+                { name: "Gopi Krishna", age: 29, location: 'Repalle' },
+                { name: "Sudheer Uppala", age: 19, location: 'Guntur' },
+                { name: "Sushmita", age: 27, location: 'Vizag' }
+            ];
+        });
+ 
+       
+        app.controller('FormController', function($scope, $location, $rootScope) {
+            /*
+            $scope.formData = {};
+ 
+            $scope.countries = ['USA', 'Canada', 'India'];
+            $scope.states = [];
+            $scope.cities = [];
+ 
+            var countryStateCityMap = {
+                'USA': {
+                    'California': ['Los Angeles', 'San Francisco'],
+                    'Texas': ['Houston', 'Dallas']
+                },
+                'Canada': {
+                    'Ontario': ['Toronto', 'Ottawa'],
+                    'Quebec': ['Montreal', 'Quebec City']
+                },
+                'India': {
+                    'Maharashtra': ['Mumbai', 'Pune'],
+                    'Karnataka': ['Bangalore', 'Mysore']
+                }
+            };
+ 
+            $scope.updateStates = function() {
+                $scope.states = Object.keys(countryStateCityMap[$scope.formData.country] || {});
+                $scope.cities = [];
+                $scope.formData.state = '';
+                $scope.formData.city = '';
+            };
+ 
+            $scope.updateCities = function() {
+                $scope.cities = countryStateCityMap[$scope.formData.country][$scope.formData.state] || [];
+                $scope.formData.city = '';
+            };
+            */
+ 
+            //add button fuctionality
+            $scope.add = function() {
+                $location.path("/grid");
+            };
+ 
+            //submit button fuctionality and adding to the table
+            /*
+            $scope.submit = function() {
+                var newUser = {
+                    name: $scope.formData.name,
+                    age: $scope.formData.age,
+                    location: $scope.formData.city
+                };
+                $rootScope.users.push(newUser);
+                localStorage.setItem('users', JSON.stringify($rootScope.users));
+                $location.path("/add");//navigating back to the /add page that is home
+            };*/
+        });
+ 
+ 
+        //cascading drop-down for fields in /grid page that is for adding new user into the table
+        app.controller('MainController', function($scope, $location, $rootScope) {
+            $scope.formData = {};
+ 
+            $scope.countries = ['USA', 'Canada', 'India'];
+            $scope.states = [];
+            $scope.cities = [];
+ 
+            var countryStateCityMap = {
+                'USA': {
+                    'California': ['Los Angeles', 'San Francisco'],
+                    'Texas': ['Houston', 'Dallas']
+                },
+                'Canada': {
+                    'Ontario': ['Toronto', 'Ottawa'],
+                    'Quebec': ['Montreal', 'Quebec City']
+                },
+                'India': {
+                    'Maharashtra': ['Mumbai', 'Pune'],
+                    'Karnataka': ['Bangalore', 'Mysore']
+                }
+            };
+ 
+            $scope.updateStates = function() {
+                $scope.states = Object.keys(countryStateCityMap[$scope.formData.country] || {});
+                $scope.cities = [];
+                $scope.formData.state = '';
+                $scope.formData.city = '';
+            };
+ 
+            $scope.updateCities = function() {
+                $scope.cities = countryStateCityMap[$scope.formData.country][$scope.formData.state] || [];
+                $scope.formData.city = '';
+            };
+ 
+            //submit functionality
+            
+            $scope.submit = function() {
+                var newUser = {
+                    name: $scope.formData.name,
+                    age: $scope.formData.age,
+                    location: $scope.formData.city
+                };
+                $rootScope.users.push(newUser);
+                localStorage.setItem('users',JSON.stringify($rootScope.users))
+                $location.path("/add");
+            };
+        });
+ 
+ 
+ 
+        app.controller("uigridCtrl", function($scope, $rootScope) {
+            $scope.gridOptions = {
+                enableSorting: true,
+                enableFiltering: false,
+                paginationPageSizes: [10, 15, 20],
+                paginationPageSize: 5,
+                columnDefs: [
+                    { field: 'name' },
+                    { field: 'age' },
+                    { field: 'location', enableFiltering: false },
+                    //{field: 'Actions', enableFiltering:false, enableSorting:false}
+                    {
+                        field:'action', enableFiltering:false, enableSorting:false,
+                        displayNamw:'Action',
+                        cellTemplate:'<button class="btn btn-danger btn-xs" ng-click="grid.appScope.deleteRow(row)">Delete</button>'+
+                        '<button class="btn btn-primary btn-xs" ng-click="grid.appScope.editRow(row)">Edit</button>'
+                    }
+                ],
+            };
+ 
+            $scope.gridOptions.data = $rootScope.users;
+ 
+            //function for the delete button
+            $scope.deleteRow = function(row) {
+                var confirmDelete=confirm("do you really want to delete this details");//confirmstion by the user to delete
+                if(confirmDelete){
+                    var index = $rootScope.users.indexOf(row.entity);
+                    if (index !== -1) {
+                        $rootScope.users.splice(index, 1);
+                        localStorage.setItem('users', JSON.stringify($rootScope.users));
+                        $scope.gridOptions.data = $rootScope.users;
+                    }
+                }
+            };
+ 
+ 
+            $scope.editRow = function(row) {
+                $rootScope.editingUser = row.entity;
+                $location.path("/edit");
+            };
+        });
+ 
+ 
+        app.controller('EditController', function($scope, $rootScope, $location) {
+            $scope.formData = angular.copy($rootScope.editingUser);
+            $scope.update = function() {
+                var index = $rootScope.users.indexOf($rootScope.editingUser);
+                if (index !== -1) {
+                    $rootScope.users[index] = $scope.formData;
+                    localStorage.setItem('users', JSON.stringify($rootScope.users));
+                    $location.path("/edit");
+                }
+            };
+        });
+    </script>
+ 
+</body>
+</html>
+ 

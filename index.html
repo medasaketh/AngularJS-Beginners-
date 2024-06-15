@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>CRUD Screens</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.js"></script>
+    <script src="http://ui-grid.info/release/ui-grid.js"></script>
+    <link rel="stylesheet" href="http://ui-grid.info/release/ui-grid.css" type="text/css">
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+        }
+        input, select {
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            grid-column: span 3;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+        }
+        .grid {
+            width: 100%;
+            height: 300px;
+        }
+        #delete{
+            background-color: rgb(233, 45, 45);
+            color: black;
+            border: 1px black solid;
+            margin-right: 5px;
+            margin-left: 5px;
+        }
+        #delete:hover{
+            transform: scale(1.2);
+        }
+        #edit{
+            background-color: rgb(57, 57, 233);
+            color: black;   
+            border: 1px black solid;
+            margin-right: 5px;
+        }
+        #edit:hover{
+            transform: scale(1.2);
+        
+        }
+        
+    </style>
+</head>
+<body>
+    <div ng-view></div>
+    <script>
+        var app = angular.module('myApp', ["ui.grid", "ui.grid.pagination", "ngRoute"]);
+
+        // Routing configuration
+        app.config(function($routeProvider) {
+            $routeProvider
+                .when("/add", {
+                    templateUrl: "add.html",
+                    controller: "FormController"
+                })
+                .when("/grid", {
+                    templateUrl: "home.html",
+                    controller: "MainController"
+                })
+                .when("/edit", {
+                    templateUrl: "edit.html",
+                    controller: "EditController"
+                })
+                .when("/delete", {
+                    templateUrl: "delete.html",
+                    controller: "DeleteController"
+                })
+                .otherwise({
+                    redirectTo: "/add"
+                });
+        });
+
+        // Grid table info and storing them
+        app.run(function($rootScope) {
+            var storedUsers = localStorage.getItem('users');
+            var storedDeletedUsers = localStorage.getItem('deletedUsers');
+
+            $rootScope.users = storedUsers ? JSON.parse(storedUsers) : [
+                { name: "Madhav Sai", age: 10, location: 'Nagpur' },
+                { name: "Suresh Dasari", age: 30, location: 'Chennai' },
+                { name: "Rohini Alavala", age: 29, location: 'Chennai' },
+                { name: "Praveen Kumar", age: 25, location: 'Bangalore' },
+                { name: "Sateesh Chandra", age: 27, location: 'Vizag' },
+                { name: "Siva Prasad", age: 38, location: 'Nagpur' },
+                { name: "Sudheer Rayana", age: 25, location: 'Kakinada' },
+                { name: "Honey Yemineni", age: 7, location: 'Nagpur' },
+            ];
+
+            $rootScope.deletedUsers = storedDeletedUsers ? JSON.parse(storedDeletedUsers) : [];
+        });
+
+        // Form controller
+        app.controller('FormController', function($scope, $location, $rootScope) {
+            $scope.formData = {};
+
+            $scope.add = function() {
+                $location.path("/grid"); // navigation to add fields 
+            };
+
+            $scope.navigateToDeletedUsers = function() {
+                $location.path("/delete");//navigation to the deleted users screen
+            };
+
+
+            $scope.download = function() {
+                //console.log("Download function called");
+                // Initialize CSV content
+                var csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "Name,Age,Location,Date\n"; // header row
+                // Check if users data is available
+                if (!$rootScope.users || !$rootScope.users.length) {
+                    console.error("No user data found to download.");
+                    return;
+                }
+                // Add user data to CSV content
+                $rootScope.users.forEach(function(user) {
+                    var row = [user.name, user.age, user.location, user.date].join(",");
+                    csvContent += row + "\n";
+                });
+                // Encode CSV content
+                var encodedUri = encodeURI(csvContent);
+                //console.log("CSV Content:", csvContent);
+                // Create download link and trigger download
+                var link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "users_report.csv");
+                document.body.appendChild(link); // Required for FF
+                link.click();
+                document.body.removeChild(link); // Clean up
+                //console.log("Download triggered");
+            };
+            
+            $scope.getResult = function() {
+                // Emit an event to trigger filtering in the uigridCtrl
+                /*$rootScope.$broadcast('filterByDate', {
+                    fromDate: new Date($scope.formData.fromDate),
+                    toDate: new Date($scope.formData.toDate)
+                });*/
+                //var fromDate=new Date($scope.formData.fromDate).toLocaleDateString();
+                //var toDate=new Date($scope.formData.toDate).toLocaleDateString();
+                $rootScope.$broadcast('filterByDate',{
+                    fromDate:new Date($scope.formData.fromDate).toLocaleDateString(),
+                    toDate:new Date($scope.formData.toDate).toLocaleDateString()
+                });
+            };
+
+            /*
+            $scope.getResult=function(){
+                $scope.$parent.getResult($scope.fromDate,$scope.toDate);
+            };*/ 
+        });
+
+        // Cascading drop-down for fields in /grid page that is adding new user to the table
+        app.controller('MainController', function($scope, $location, $rootScope) {
+            $scope.formData = {};
+            $scope.countries = ['USA', 'Canada', 'India'];
+            $scope.states = [];
+            $scope.cities = [];
+
+            var countryStateCityMap = {
+                'USA': {
+                    'California': ['Los Angeles', 'San Francisco'],
+                    'Texas': ['Houston', 'Dallas'],
+                    'Alabama':['Montgomery','Birmingham']
+                },
+                'Canada': {
+                    'Ontario': ['Toronto', 'Ottawa'],
+                    'Quebec': ['Montreal', 'Quebec City']
+                },
+                'India': {
+                    'Maharashtra': ['Mumbai', 'Pune'],
+                    'Karnataka': ['Bangalore', 'Mysore'],
+                    'Andhra Pradesh':['Guntur','Tirupathi','Vizag'],
+                    'Telangana':['Hyderabad','warrangal','Secunderabad']
+                },
+                'Australia':{
+                    'New South wales':['Sydney','New Castle','Wagga Wagga'],
+                    'Victoria':['Melbourne','Ballarat','Geelong']
+                }
+            };
+
+            $scope.updateStates = function() {
+                $scope.states = Object.keys(countryStateCityMap[$scope.formData.country] || {});
+                $scope.cities = [];
+                $scope.formData.state = '';
+                $scope.formData.city = '';
+            };
+
+            $scope.updateCities = function() {
+                $scope.cities = countryStateCityMap[$scope.formData.country][$scope.formData.state] || [];
+                $scope.formData.city = '';
+            };
+
+            // Submit functionality
+            $scope.submit = function() {
+                var newUser = {
+                    name: $scope.formData.name,
+                    age: $scope.formData.age,
+                    location: $scope.formData.city,
+                    //date: new Date($scope.formData.date).toISOStrig()
+                    date: new Date($scope.formData.date).toLocaleDateString() //displaying the date entered by the user
+                    //date: new Date($scope.formData.date).toISOStrig()
+                };
+                $rootScope.users.push(newUser);
+                localStorage.setItem('users', JSON.stringify($rootScope.users)); // saving to the local storage
+                $location.path("/add"); // navigate to home page
+            };
+
+            $scope.close=function(){
+                $location.path("/add");//close function navigate to /add home [page]
+            }
+
+            $scope.navigateToDeletedUsers = function() {
+                $location.path("/delete");//navigate to delted users grid table
+            };
+
+            /*
+            $scope.getResults=function(){
+                $scope.$parent.getResults($scope.fromDate,$scope.toDate);
+            };*/
+        });
+
+        // Grid table declaration and initialization of home page
+        app.controller("uigridCtrl", function($scope, $rootScope, $location) {
+            $scope.gridOptions = {
+                enableSorting: true,
+                enableFiltering: false,
+                paginationPageSizes: [10, 15, 20],
+                paginationPageSize: 10,
+                columnDefs: [
+                    { field: 'name' },
+                    { field: 'age' },
+                    { field: 'location', enableFiltering: false },
+                    { field: 'date', enableFiltering: false },
+                    {
+                        field: 'action', enableFiltering: false, enableSorting: false,
+                        displayName: 'Action',
+                        cellTemplate: '<button id="delete" class="btn btn-danger btn-xs" ng-click="grid.appScope.deleteRow(row)">Delete</button> ' +
+                                      '<button id="edit" class="btn btn-primary btn-xs" ng-click="grid.appScope.editRow(row)">Edit</button>'
+                    },
+                ],
+            };
+
+            $scope.gridOptions.data = $rootScope.users;
+
+            // Function for delete button
+            $scope.deleteRow = function(row) {
+                var confirmDelete = confirm("Do you really want to delete this details?");
+                if (confirmDelete) {
+                    var index = $rootScope.users.indexOf(row.entity);
+                    if (index !== -1) {
+                        $rootScope.deletedUsers.push(angular.copy(row.entity)); // store deleted user details
+                        $rootScope.users.splice(index, 1);
+                        localStorage.setItem('users', JSON.stringify($rootScope.users)); // store updated users array in localStorage
+                        localStorage.setItem('deletedUsers', JSON.stringify($rootScope.deletedUsers)); // store deleted users in localStorage
+                        $scope.gridOptions.data = $rootScope.users;
+                    }
+                }
+            };
+
+            // Edit button functionality
+            $scope.editRow = function(row) {
+                $rootScope.editingUser = row.entity;
+                $location.path("/edit"); // navigate to the edit page
+            };
+
+            
+            $rootScope.$on('filterByDate', function(event, data) {
+                var fromDate = new Date(data.fromDate).toLocaleDateString();//data.fromDate;//new Date($scope.formData.fromDate).toLocaleDateString();//new Date(data.fromDate).toLocaleDateString()
+                var toDate = new Date(data.toDate).toLocaleDateString();//data.toDate;//new Date($scope.formData.toDate).toLocaleDateString()//new Date(data.toDate).toLocaleDateString();
+                var filteredData = $rootScope.users.filter(function(user) {
+                    var userDate = new Date(user.date).toLocaleDateString();
+                    return userDate >= fromDate && userDate <= toDate;
+                });
+                $scope.gridOptions.data = filteredData;
+            });
+
+            /*
+            $scope.getResult=function(fromDate,toDate){
+                var filteredUsers=$rootScope.users.filter(function(users){
+                    var userDate=new Date(user.date);
+                    return userDate>=new Date(fromDate)&& userDate<=new Date(toDate);
+                });
+                $scope.gridOptions.data=filteredUsers;
+            };*/
+
+            /*
+            $scope.refresh=function(){
+                $scope.gridOptions.data=$rootScope.users;
+            }*/
+        });
+
+        // Edit controller
+        app.controller('EditController', function($scope, $rootScope, $location) {
+            $scope.formData = $rootScope.editingUser;
+
+            // Update functionality
+            $scope.update = function() {
+                var index = $rootScope.users.indexOf($rootScope.editingUser);
+                if (index !== -1) {
+                    //$rootScope.users[index] = $scope.formData;
+                    //angular.extend($rootScope.users[index],$scope.formData);
+                    $rootScope.editingUser.name=$scope.formData.name;
+                    $rootScope.editingUser.age=$scope.formData.age;
+                    $rootScope.editingUser.location=$scope.formData.location;
+                    localStorage.setItem('users', JSON.stringify($rootScope.users)); // updating in the local storage
+                    //$rootScope.$apply();
+                    $location.path("/add"); // after updating navigating to the home page
+                }
+            };
+
+            // Close functionality in the edit page
+            $scope.close = function() {
+                $location.path("/add"); // navigation to the home page
+            };
+
+            $scope.isEditable=false;//intitally not allowing
+
+            $scope.toggleEdit=function(){
+                $scope.isEditable=!$scope.isEditable;//permission to edit the data
+            }
+        });
+
+        // Delete controller
+        app.controller('DeleteController', function($scope, $rootScope,$location) {
+            $scope.gridOptions = {
+                enableSorting: true,
+                enableFiltering: false,
+                paginationPageSizes: [10, 15, 20],
+                paginationPageSize: 15,
+                columnDefs: [
+                    { field: 'name', displayName: 'Name' },
+                    { field: 'age', displayName: 'Age' },
+                    { field: 'location', displayName: 'Location' },
+                    /*
+                    {
+                        field: 'action', enableFiltering: false, enableSorting: false,
+                        displayName: 'Action',
+                        cellTemplate: '<button class="btn btn-danger btn-xs" ng-click="grid.appScope.deleteRow(row)">Delete Permanently</button> '
+                    }*/ 
+                ],
+            };
+
+            /*
+            $scope.deleteRow = function(row) {
+                var confirmDelete = confirm("Do you really want to delete this details?");
+                if (confirmDelete) {
+                    var index = $rootScope.users.indexOf(row.entity);
+                    if (index !== -1) {
+                        $rootScope.deletedUsers.push(angular.copy(row.entity)); // store deleted user details
+                        $rootScope.users.splice(index, 1);
+                        localStorage.setItem('users', JSON.stringify($rootScope.users)); // store updated users array in localStorage
+                        localStorage.setItem('deletedUsers', JSON.stringify($rootScope.deletedUsers)); // store deleted users in localStorage
+                        $scope.gridOptions.data = $rootScope.users;
+                    }
+                }
+            };
+            */ 
+
+            $scope.gridOptions.data = $rootScope.deletedUsers;
+
+            $scope.close=function(){
+                $location.path("/add");
+            }
+        });
+    </script>
+</body>
+</html>

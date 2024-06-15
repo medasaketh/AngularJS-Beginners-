@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <script src="app.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: rgb(129, 230, 129);
+        }
+        .header {
+            background-color: green;
+            color: white;
+            padding: 5px;
+            margin-bottom: 20px;
+            margin-top: 10px;  
+        }
+        .container {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 45vh;
+            width: 70vh;
+            padding: 8px;
+        }
+        .form-group label {
+            width: 120px;
+            text-align: left;
+            padding-right: 5px;
+        }
+        .form-group div {
+            display: flex;
+            align-items: center;
+        }
+        .form-group input, .form-group select {
+            flex: 1;
+            padding: 3px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px 15px;
+        }
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        #close {
+            background-color: black;
+            color: white;
+            border: 2px white solid;
+        }
+        #close:hover {
+            transform: scale(1.2);
+        }
+        #name:hover, #age:hover, #phone:hover, #date:hover {
+            border: 2px black solid;
+        }
+    </style>
+</head>
+<body>
+    <h2 class="header">Adding new user to the list</h2>
+    <div class="container" ng-controller="MainController" ng-submit="submit()">
+        <form name="userForm" novalidate>
+            <div class="form-group" ng-submit="register()">
+                <div>
+                    <label for="name">Name:</label>
+                    <input placeholder="enter your name" type="text" id="name" ng-model="formData.name" ng-required="true" name="name" required>
+                </div>
+                <div>
+                    <label for="age">Age:</label>
+                    <input placeholder="enter your age" type="number" id="age" ng-model="formData.age" ng-required="true" name="age" required>
+                </div>
+                <div>
+                    <label for="date">Date of Joining:</label>
+                    <input type="date" name="date" id="date" ng-model="formData.date" ng-required="true" required>
+                </div>
+                <div>
+                    <label for="country">Country:</label>
+                    <select id="country" ng-model="formData.country" ng-change="updateStates()" required>
+                        <option ng-repeat="country in countries" value="{{country}}">{{country}}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="state">State:</label>
+                    <select id="state" ng-model="formData.state" ng-change="updateCities()" required>
+                        <option ng-repeat="state in states" value="{{state}}">{{state}}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="city">City:</label>
+                    <select id="city" ng-model="formData.city" required>
+                        <option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="phone">Phone Number:</label>
+                    <input placeholder="enter your phone number" type="text" id="phone" ng-model="formData.phone" required>
+                </div>
+            </div>
+            <div class="buttons">
+                <button type="submit" ng-click="submit()" ng-disabled="userForm.$invalid">Submit</button>
+                <button id="close" type="button" ng-click="close()" style="margin-top: 10px;">Close</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

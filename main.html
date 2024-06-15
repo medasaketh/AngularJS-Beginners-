@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <style>
+            .container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+            label {
+                margin-bottom: 5px;
+            }
+            input, select {
+                padding: 8px;
+                box-sizing: border-box;
+            }
+            .buttons {
+                grid-column: span 3;
+                display: flex;
+                justify-content: flex-start;
+                gap: 10px;
+            }
+            button {
+                padding: 10px 15px;
+            }
+            .grid {
+                width: 100%; 
+                height: 300px; 
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container" ng-controller="MainController">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" ng-model="formData.name">
+            </div>
+        
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" ng-model="formData.age">
+            </div>
+        
+            <div class="form-group">
+                <label for="country">Country:</label>
+                <select id="country" ng-model="formData.country" ng-change="updateStates()">
+                    <option ng-repeat="country in countries" value="{{country}}">{{country}}</option>
+                </select>
+            </div>
+        
+            <div class="form-group">
+                <label for="state">State:</label>
+                <select id="state" ng-model="formData.state" ng-change="updateCities()">
+                    <option ng-repeat="state in states" value="{{state}}">{{state}}</option>
+                </select>
+            </div>
+        
+            <div class="form-group">
+                <label for="city">City:</label>
+                <select id="city" ng-model="formData.city">
+                    <option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
+                </select>
+            </div>
+        
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="text" id="phone" ng-model="formData.phone">
+            </div>
+        
+            <div class="buttons">
+                <button ng-click="add()">Add</button>
+            </div>
+        
+            <br>
+        
+            <div ui-grid="gridOptions" ui-grid-pagination class="grid"></div>
+        </div>        
+    </body>
+</html>

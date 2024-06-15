@@ -1,0 +1,18 @@
+<head>
+    <style>
+        #close:hover{
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div ng-controller="EditedController">
+            <h2>Edited users</h2>
+            <div class="grid" ui-grid="gridOptions" ui-grid-pagination></div>
+            <br>
+            <button id="close" type="button" ng-click="close()">close</button>
+        </div>
+    </div>
+</body>
+

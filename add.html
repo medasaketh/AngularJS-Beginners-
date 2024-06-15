@@ -1,0 +1,71 @@
+<html>
+<style>
+</style>
+<body>
+<h2 style="background-color: green;color: white;padding: 10px;border: 2px black solid;">User Details</h2>
+<div class="container" ng-controller="FormController">
+<!--
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" ng-model="formData.name">
+    </div>
+
+    <div class="form-group">
+        <label for="age">Age:</label>
+        <input type="number" id="age" ng-model="formData.age">
+    </div>
+
+    <div class="form-group">
+        <label for="country">Country:</label>
+        <select id="country" ng-model="formData.country" ng-change="updateStates()">
+            <option ng-repeat="country in countries" value="{{country}}">{{country}}</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="state">State:</label>
+        <select id="state" ng-model="formData.state" ng-change="updateCities()">
+            <option ng-repeat="state in states" value="{{state}}">{{state}}</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="city">City:</label>
+        <select id="city" ng-model="formData.city">
+            <option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" ng-model="formData.phone">
+    </div>
+-->
+
+    <div>
+        <label for="fromDate" >From Date:</label>
+        <input type="date" id="fromDate" ng-model="formData.fromDate" style="margin-right: 5px;">
+        <label for="toDate">To Date:</label>
+        <input type="date" id="toDate" ng-model="formData.toDate">
+    
+        <button ng-click="getResult()" style="margin-left: 10px;background-color: green;color: white;"
+            onmouseover="this.style.backgroundColor='white';this.style.color='black';"
+            onmouseout="this.style.backgroundColor='green';this.style.color='white'">Get Result</button>
+        <button ng-click="add()" style="margin-left: 300px;background-color: green;color: white;border: 2px solid #000;;"
+            onmouseover="this.style.backgroundColor='white';this.style.color='black';"
+            onmouseout="this.style.backgroundColor='green';this.style.color='white'">Add User</button>
+        <button class="delete" ng-click="navigateToDeletedUsers()" style="margin-left: 60px;background-color: green;color: white;border: 2px black solid;"
+            onmouseover="this.style.backgroundColor='white';this.style.color='black';"
+            onmouseout="this.style.backgroundColor='green';this.style.color='white'">View Deleted Users</button>
+        <button class="download" ng-click="download()" style="background-color: green;color: white;margin-left: 10px;margin-right: 1px;border: 2px black solid;size: 2px;" 
+            onmouseover="this.style.backgroundColor='white';this.style.color='black';" 
+            onmouseout="this.style.backgroundColor='green';this.style.color='white'">Download Users List</button>
+
+    </div>
+</div>
+<br>
+<div ng-controller="uigridCtrl">
+    <div ui-grid="gridOptions" ui-grid-pagination class="grid"></div>
+</div>
+</body>
+</html>
